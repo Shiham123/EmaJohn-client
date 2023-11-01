@@ -44,3 +44,7 @@
   color: black;
   border: none;
 }
+
+.selected {
+  font-size: 20px;
+}

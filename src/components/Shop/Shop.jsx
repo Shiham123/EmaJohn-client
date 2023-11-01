@@ -14,6 +14,7 @@ import { Link, useLoaderData } from 'react-router-dom';
 const Shop = () => {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
   const [itemPerPage, setItemPerPage] = useState(10);
 
   const loaderData = useLoaderData();
@@ -23,10 +24,13 @@ const Shop = () => {
   const pages = [...Array(numberOfPage).keys()];
 
   useEffect(() => {
-    fetch('http://localhost:5000/products')
+    fetch(
+      `http://localhost:5000/products?page=${currentPage}&size=${itemPerPage}`
+    )
       .then((res) => res.json())
-      .then((data) => setProducts(data));
-  }, []);
+      .then((data) => setProducts(data))
+      .catch((error) => console.log(error));
+  }, [currentPage, itemPerPage]);
 
   useEffect(() => {
     const storedCart = getShoppingCart();
@@ -76,6 +80,19 @@ const Shop = () => {
   const handleItemChange = (event) => {
     const value = parseInt(event.target.value);
     setItemPerPage(value);
+    setCurrentPage(0);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < pages.length) {
+      setCurrentPage(currentPage + 1);
+    }
   };
 
   return (
@@ -98,9 +115,20 @@ const Shop = () => {
         </Cart>
       </div>
       <div className="pagination">
+        <button onClick={handlePreviousPage}>Previous</button>
         {pages.map((item, index) => {
-          return <button key={index}>{item}</button>;
+          return (
+            <button
+              className={currentPage === item ? 'selected' : ''}
+              onClick={() => setCurrentPage(item)}
+              key={index}
+            >
+              {item}
+            </button>
+          );
         })}
+        <button onClick={handleNextPage}>Next</button>
+        <p>current page : {currentPage}</p>
         <select value={itemPerPage} onChange={handleItemChange} name="select">
           <option value="5">5</option>
           <option value="10">10</option>
