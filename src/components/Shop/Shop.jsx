@@ -13,7 +13,11 @@ import { Link, useLoaderData } from 'react-router-dom';
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
-  // const [cart, setCart] = useState([]);
+
+  // added cart to order state
+  const [addCart, setAddCart] = useState([]);
+  const [purchaseProduct, setPurchaseProduct] = useState([]);
+
   const cart = useLoaderData();
   const [currentPage, setCurrentPage] = useState(0);
   const [itemPerPage, setItemPerPage] = useState(10);
@@ -29,10 +33,7 @@ const Shop = () => {
   useEffect(() => {
     fetch('http://localhost:5000/productsCount')
       .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        setCount(data.count);
-      })
+      .then((data) => setCount(data.count))
       .catch((error) => console.log(error));
   }, []);
 
@@ -44,6 +45,30 @@ const Shop = () => {
       .then((data) => setProducts(data))
       .catch((error) => console.log(error));
   }, [currentPage, itemPerPage]);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/products')
+      .then((response) => response.json())
+      .then((data) => setPurchaseProduct(data))
+      .catch((error) => console.log(error));
+  }, []);
+
+  useEffect(() => {
+    const storingCart = getShoppingCart();
+    const savedCart = [];
+
+    for (const id in storingCart) {
+      const addedProduct = purchaseProduct.find(
+        (product) => product._id === id
+      );
+      if (addedProduct) {
+        const quantity = storingCart[id];
+        addedProduct.quantity = quantity;
+        savedCart.push(addedProduct);
+      }
+    }
+    setAddCart(savedCart);
+  }, [purchaseProduct]);
 
   // useEffect(() => {
   //   const storedCart = getShoppingCart();
@@ -66,24 +91,43 @@ const Shop = () => {
   // }, [products]);
 
   const handleAddToCart = (product) => {
-    // cart.push(product); '
     let newCart = [];
-    // const newCart = [...cart, product];
-    // if product doesn't exist in the cart, then set quantity = 1
-    // if exist update quantity by 1
-    const exists = cart.find((pd) => pd._id === product._id);
-    if (!exists) {
+    const existing = addCart.find(
+      (exitProduct) => exitProduct._id === product._id
+    );
+
+    if (!existing) {
       product.quantity = 1;
-      newCart = [...cart, product];
+      newCart = [...addCart, product];
     } else {
-      exists.quantity = exists.quantity + 1;
-      const remaining = cart.filter((pd) => pd._id !== product._id);
-      newCart = [...remaining, exists];
+      existing.quantity = existing.quantity + 1;
+      const remaining = addCart.filter((pd) => pd._id !== product._id);
+      newCart = [...remaining, existing];
     }
 
-    setCart(newCart);
+    setAddCart(newCart);
     addToDb(product._id);
   };
+
+  // const handleAddToCart = (product) => {
+  //   // cart.push(product); '
+  //   let newCart = [];
+  //   // const newCart = [...cart, product];
+  //   // if product doesn't exist in the cart, then set quantity = 1
+  //   // if exist update quantity by 1
+  //   const exists = cart.find((pd) => pd._id === product._id);
+  //   if (!exists) {
+  //     product.quantity = 1;
+  //     newCart = [...cart, product];
+  //   } else {
+  //     exists.quantity = exists.quantity + 1;
+  //     const remaining = cart.filter((pd) => pd._id !== product._id);
+  //     newCart = [...remaining, exists];
+  //   }
+
+  //   // setCart(newCart);
+  //   addToDb(product._id);
+  // };
 
   const handleClearCart = () => {
     setCart([]);
@@ -120,13 +164,19 @@ const Shop = () => {
         ))}
       </div>
 
+      {/* ---------------------------- */}
       <div className="cart-container">
-        <Cart cart={cart} handleClearCart={handleClearCart}>
+        <Cart
+          purchaseProduct={purchaseProduct}
+          handleClearCart={handleClearCart}
+        >
           <Link className="proceed-link" to="/orders">
             <button className="btn-proceed">Review Order</button>
           </Link>
         </Cart>
       </div>
+
+      {/* ------------------- */}
       <div className="pagination">
         <button onClick={handlePreviousPage}>Previous</button>
         {pages.map((item, index) => {
