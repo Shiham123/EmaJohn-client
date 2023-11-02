@@ -166,10 +166,7 @@ const Shop = () => {
 
       {/* ---------------------------- */}
       <div className="cart-container">
-        <Cart
-          addCart={addCart}
-          handleClearCart={handleClearCart}
-        >
+        <Cart addCart={addCart} handleClearCart={handleClearCart}>
           <Link className="proceed-link" to="/orders">
             <button className="btn-proceed">Review Order</button>
           </Link>
