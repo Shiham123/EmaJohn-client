@@ -130,7 +130,7 @@ const Shop = () => {
   // };
 
   const handleClearCart = () => {
-    setCart([]);
+    setAddCart([]);
     deleteShoppingCart();
   };
 
@@ -167,7 +167,7 @@ const Shop = () => {
       {/* ---------------------------- */}
       <div className="cart-container">
         <Cart
-          purchaseProduct={purchaseProduct}
+          addCart={addCart}
           handleClearCart={handleClearCart}
         >
           <Link className="proceed-link" to="/orders">

@@ -3,16 +3,21 @@ import './Cart.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
-const Cart = ({ purchaseProduct, handleClearCart, children }) => {
+const Cart = ({ addCart, handleClearCart, children }) => {
   // const cart = props.cart; // option 1
   // const {cart} = props; // option 2
 
   // console.log(cart);
 
+  if (!Array.isArray(addCart)) {
+    return <div></div>;
+  }
+
   let totalPrice = 0;
   let totalShipping = 0;
   let quantity = 0;
-  for (const product of purchaseProduct) {
+
+  for (const product of addCart) {
     // if(product.quantity === 0){
     //     product.quantity = 1;
     // }
